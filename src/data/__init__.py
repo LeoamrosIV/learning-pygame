@@ -5,3 +5,4 @@ Contains data classes and constants.
 """
 from .dataclasses import *
 from .const import *
+from .get_assets import *
