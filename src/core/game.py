@@ -8,8 +8,8 @@ import sys
 import pygame as pg
 
 from data import (SCREEN_RES, GAME_TITLE, MAX_FPS,
-                  Area, P, PTuple,
-                  get_background_sprite, get_font)
+                  P, PTuple,
+                  get_sprite, get_font)
 
 
 class Game:
@@ -37,8 +37,16 @@ class Game:
         Initializes persistent entities.
         """
         self.font = get_font(50)
-        self.sky = get_background_sprite("sky.png")
-        self.ground = get_background_sprite("ground.png")
+        self.score = 0
+        self.score_pos = PTuple(20, SCREEN_RES.height - 40)
+
+        self.sky = get_sprite("background", "sky.png")
+        self.sky_pos = PTuple(0, 0)
+        self.ground = get_sprite("background", "ground.png")
+        self.ground_pos = PTuple(0, self.sky.get_size()[1])
+
+        self.snail = get_sprite("snail", "snail1.png")
+        self.snail_pos = P(SCREEN_RES.width, self.ground_pos[1] - self.snail.get_size()[1])
 
     def _run_game_loop(self) -> None:
         """
@@ -67,14 +75,18 @@ class Game:
                 sys.exit()
 
     def _update_screen(self) -> None:
-        self.screen.blit(self.sky, PTuple(0, 0))
-        self.screen.blit(self.ground, PTuple(0, self.sky.get_size()[1]))
+        self.screen.blit(self.sky, self.sky_pos)
+        self.screen.blit(self.ground, self.ground_pos)
 
-        while True:
-            # Limit FPS and calculate delta time
-            dt = clock.tick(MAX_FPS)
+        score_surface = self.font.render(f"Score: {self.score}", False, "White")
+        self.screen.blit(score_surface, self.score_pos)
 
-            self._process_events(dt)
+        self.screen.blit(self.snail, self.snail_pos())
+        if self.snail_pos.x <= -self.snail.get_size()[0]:
+            self.snail_pos.x = SCREEN_RES.width
+            self.score += 100
+        else:
+            self.snail_pos.x -= 1
 
         # Draw elements on display
         pg.display.update()
