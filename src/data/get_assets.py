@@ -10,15 +10,26 @@ import pygame as pg
 from . import GRAPHICS_DIR, FONT_DIR
 
 
-def _get_sprite(*path: str, alpha: bool = False) -> pg.Surface:
-    """
-    Given a path to an image, returns a pg.Surface with that image.
+_alpha_for_sprite_group = {
+    "background": False,
+    "player": True,
+    "fly": True,
+    "snail": True,
+}
 
-    :param path: Path to sprite file.
-    :param alpha: If True, allows transparency.
+
+def get_sprite(group: str, name: str) -> pg.Surface:
+    """
+    Given the name of the sprites group and the name of the sprite,
+    returns a pg.Surface with that image.
+
+    :param group: Folder name.
+    :param name: Sprite name.
     :return: Selected sprite.
     """
-    raw_img = pg.image.load(os.path.join(*path))
+    assert group in _alpha_for_sprite_group, f"Only this groups accepted: {list(_alpha_for_sprite_group)}"
+    alpha = _alpha_for_sprite_group[group]
+    raw_img = pg.image.load(os.path.join(GRAPHICS_DIR, group, name))
     return raw_img.convert_alpha() if alpha else raw_img.convert()
 
 
@@ -32,16 +43,3 @@ def get_font(size: int, default: bool = False) -> pg.font.Font:
     """
     font_name = None if default else os.path.join(FONT_DIR, "Pixeltype.ttf")
     return pg.font.Font(font_name, size)
-
-
-def get_background_sprite(name: str, alpha: bool = False) -> pg.Surface:
-    """
-    Returns the selected background sprite.
-
-    :param name: Image name.
-    :param alpha: If True, allows transparency.
-    :return: Selected sprite.
-    """
-    return _get_sprite(GRAPHICS_DIR, "background", name, alpha=alpha)
-
-
