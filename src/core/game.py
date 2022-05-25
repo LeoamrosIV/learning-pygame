@@ -62,6 +62,7 @@ class Game:
             dt = clock.tick(MAX_FPS)
             self._process_events(dt)
             self._update_screen()
+            self._check_collisions()
 
     def _process_events(self, dt: int) -> None:
         """
@@ -93,6 +94,10 @@ class Game:
 
         # Draw elements on display
         pg.display.update()
+
+    def _check_collisions(self) -> None:
+        if self.player_rect.colliderect(self.snail_rect):
+            self.score += 5
 
     @staticmethod
     def _is_quit_button(event: pg.event.Event) -> bool:
