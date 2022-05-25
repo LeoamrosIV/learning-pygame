@@ -45,6 +45,9 @@ class Game:
         self.ground = get_sprite("background", "ground.png")
         self.ground_pos = PTuple(0, self.sky.get_size()[1])
 
+        self.player = get_sprite("player", "player_stand.png")
+        self.player_rect = self.player.get_rect(midbottom=(50, self.ground_pos[1]))
+
         self.snail = get_sprite("snail", "snail1.png")
         self.snail_rect = self.snail.get_rect(midbottom=(SCREEN_RES.width, self.ground_pos[1]))
 
@@ -77,6 +80,7 @@ class Game:
     def _update_screen(self) -> None:
         self.screen.blit(self.sky, self.sky_pos)
         self.screen.blit(self.ground, self.ground_pos)
+        self.screen.blit(self.player, self.player_rect)
 
         score_surface = self.font.render(f"Score: {self.score}", False, "White")
         self.screen.blit(score_surface, self.score_pos)
