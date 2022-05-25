@@ -8,8 +8,9 @@ import sys
 import pygame as pg
 
 from data import (SCREEN_RES, GAME_TITLE, MAX_FPS,
-                  P, PTuple,
                   get_sprite, get_font)
+
+from entities import Entity
 
 
 class Game:
@@ -38,18 +39,16 @@ class Game:
         """
         self.font = get_font(50)
         self.score = 0
-        self.score_pos = PTuple(20, SCREEN_RES.height - 40)
+        self.score_pos = (20, SCREEN_RES.height - 40)
 
-        self.sky = get_sprite("background", "sky.png")
-        self.sky_pos = PTuple(0, 0)
-        self.ground = get_sprite("background", "ground.png")
-        self.ground_pos = PTuple(0, self.sky.get_size()[1])
+        self.sky = Entity(get_sprite("background", "sky.png"))
+        self.ground = Entity(get_sprite("background", "ground.png"), topleft=(0, self.sky.rect.height))
 
-        self.player = get_sprite("player", "player_stand.png")
-        self.player_rect = self.player.get_rect(midbottom=(50, self.ground_pos[1]))
+        self.player = Entity(get_sprite("player", "player_stand.png"),
+                             midbottom=(50, self.ground.rect.y))
 
-        self.snail = get_sprite("snail", "snail1.png")
-        self.snail_rect = self.snail.get_rect(midbottom=(SCREEN_RES.width, self.ground_pos[1]))
+        self.snail = Entity(get_sprite("snail", "snail1.png"),
+                            midbottom=(SCREEN_RES.width, self.ground.rect.y))
 
     def _run_game_loop(self) -> None:
         """
@@ -79,28 +78,35 @@ class Game:
                 sys.exit()
 
             elif event.type == pg.MOUSEBUTTONDOWN:
-                if self.snail_rect.collidepoint(event.pos):
+                if self.snail.rect.collidepoint(event.pos):
                     self.score += 5
 
     def _update_screen(self) -> None:
-        self.screen.blit(self.sky, self.sky_pos)
-        self.screen.blit(self.ground, self.ground_pos)
-        self.screen.blit(self.player, self.player_rect)
+        """
+        Draws elements on screen.
+        """
+        self.sky.blit(self.screen)
+        self.ground.blit(self.screen)
 
         score_surface = self.font.render(f"Score: {self.score}", False, "White")
         self.screen.blit(score_surface, self.score_pos)
 
-        self.screen.blit(self.snail, self.snail_rect)
-        if self.snail_rect.right <= 0:
-            self.snail_rect.left = SCREEN_RES.width
+        self.player.blit(self.screen)
+        self.snail.blit(self.screen)
+
+        if self.snail.rect.right <= 0:
+            self.snail.rect.left = SCREEN_RES.width
         else:
-            self.snail_rect.x -= 1
+            self.snail.rect.x -= 1
 
         # Draw elements on display
         pg.display.update()
 
     def _check_collisions(self) -> None:
-        if self.player_rect.colliderect(self.snail_rect):
+        """
+        Checks if objects are colliding.
+        """
+        if self.player.rect.colliderect(self.snail.rect):
             self.score += 5
 
     @staticmethod
