@@ -98,6 +98,10 @@ class Game:
         self.player.blit(self.screen)
         self.snail.blit(self.screen)
 
+        mouse_pos = pg.mouse.get_pos()
+        if self.snail.rect.collidepoint(mouse_pos):
+            pg.draw.circle(self.screen, "gold", mouse_pos, 30, 5)
+
         if self.snail.rect.right <= 0:
             self.snail.rect.left = SCREEN_RES.width
         else:
