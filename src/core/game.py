@@ -39,7 +39,7 @@ class Game:
         """
         self.font = get_font(50)
         self.score = 0
-        self.score_pos = (20, SCREEN_RES.height - 40)
+        self.score_pos = (20, SCREEN_RES.height - 28)
 
         self.sky = Entity(get_sprite("background", "sky.png"))
         self.ground = Entity(get_sprite("background", "ground.png"), topleft=(0, self.sky.rect.height))
@@ -88,8 +88,12 @@ class Game:
         self.sky.blit(self.screen)
         self.ground.blit(self.screen)
 
-        score_surface = self.font.render(f"Score: {self.score}", False, "White")
-        self.screen.blit(score_surface, self.score_pos)
+        score_surf = self.font.render(f"Score: {self.score}", False, "black")
+        score_rect = score_surf.get_rect(midleft=self.score_pos)
+        score_bg_rect = score_rect.inflate(10, 10)
+        score_bg_rect.y -= 4
+        pg.draw.rect(self.screen, "bisque2", score_bg_rect, border_radius=3)
+        self.screen.blit(score_surf, score_rect)
 
         self.player.blit(self.screen)
         self.snail.blit(self.screen)
