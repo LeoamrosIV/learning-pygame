@@ -46,7 +46,7 @@ class Game:
         self.ground_pos = PTuple(0, self.sky.get_size()[1])
 
         self.snail = get_sprite("snail", "snail1.png")
-        self.snail_pos = P(SCREEN_RES.width, self.ground_pos[1] - self.snail.get_size()[1])
+        self.snail_rect = self.snail.get_rect(midbottom=(SCREEN_RES.width, self.ground_pos[1]))
 
     def _run_game_loop(self) -> None:
         """
@@ -81,12 +81,11 @@ class Game:
         score_surface = self.font.render(f"Score: {self.score}", False, "White")
         self.screen.blit(score_surface, self.score_pos)
 
-        self.screen.blit(self.snail, self.snail_pos())
-        if self.snail_pos.x <= -self.snail.get_size()[0]:
-            self.snail_pos.x = SCREEN_RES.width
-            self.score += 100
+        self.screen.blit(self.snail, self.snail_rect)
+        if self.snail_rect.right <= 0:
+            self.snail_rect.left = SCREEN_RES.width
         else:
-            self.snail_pos.x -= 1
+            self.snail_rect.x -= 1
 
         # Draw elements on display
         pg.display.update()
