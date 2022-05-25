@@ -78,6 +78,10 @@ class Game:
                 # Exit the game
                 sys.exit()
 
+            elif event.type == pg.MOUSEBUTTONDOWN:
+                if self.snail_rect.collidepoint(event.pos):
+                    self.score += 5
+
     def _update_screen(self) -> None:
         self.screen.blit(self.sky, self.sky_pos)
         self.screen.blit(self.ground, self.ground_pos)
