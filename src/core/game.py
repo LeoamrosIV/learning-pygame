@@ -21,7 +21,11 @@ class Game:
     def __init__(self) -> None:
         # Initialize all imported pygame modules.
         pg.init()
-
+        self._keys_pressed = {
+            K_UP: False,
+            K_RIGHT: False,
+            K_LEFT: False,
+        }
         self._init_window()
         self._init_entities()
         self._run_game_loop()
@@ -73,13 +77,19 @@ class Game:
         """
         for event in pg.event.get():
 
-            if self._is_quit_button(event):
-                # Exit the game
-                sys.exit()
+            if event.type == KEYDOWN:
+                self._handle_key_down(event.key)
+
+            elif event.type == KEYUP:
+                self._handle_key_up(event.key)
 
             elif event.type == pg.MOUSEBUTTONDOWN:
                 if self.snail.rect.collidepoint(event.pos):
                     self.score += 5
+
+            elif event.type == pg.QUIT:
+                # Exit the game
+                sys.exit()
 
     def _update_screen(self) -> None:
         """
@@ -117,12 +127,18 @@ class Game:
         if self.player.rect.colliderect(self.snail.rect):
             self.score += 5
 
-    @staticmethod
-    def _is_quit_button(event: pg.event.Event) -> bool:
+    def _handle_key_down(self, key: int) -> None:
         """
-        Checks if an event to quit the game has been triggered.
+        Handles `KEYDOWN` events.
 
-        :param event: Captured event.
-        :return: `True` if user triggered a quit event.
+        :param key: Pressed key.
         """
-        return event.type == pg.QUIT or (event.type == pg.KEYUP and event.dict["key"] == pg.K_ESCAPE)
+        self._keys_pressed[key] = True
+
+    def _handle_key_up(self, key: int) -> None:
+        """
+        Handles `KEYUP` events.
+
+        :param key: Released key.
+        """
+        self._keys_pressed[key] = False
