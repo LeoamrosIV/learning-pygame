@@ -6,6 +6,7 @@ Contains Game class.
 import sys
 
 import pygame as pg
+from pygame.locals import *
 
 from data import (SCREEN_RES, GAME_TITLE, MAX_FPS,
                   get_sprite, get_font)
@@ -64,8 +65,9 @@ class Game:
             # Limit FPS and calculate delta time
             dt = clock.tick(MAX_FPS)
             self._process_events(dt)
-            self._update_screen()
+            self._handle_movement(dt)
             self._check_collisions()
+            self._update_screen()
 
     def _process_events(self, dt: int) -> None:
         """
@@ -120,12 +122,44 @@ class Game:
         # Draw elements on display
         pg.display.update()
 
+    def _handle_movement(self, dt: int) -> None:
+        """
+        Handles player movement.
+
+        :param dt: delta time.
+        """
+        x = y = 0
+
+        # ----- Movement using pygame.key.get_pressed() ----- #
+        # keys = pg.key.get_pressed()
+        # x += int(keys[K_RIGHT]) - int(keys[K_LEFT])
+
+        x += (int(self._keys_pressed[K_RIGHT]) - int(self._keys_pressed[K_LEFT])) * dt * 0.5
+        y -= int(self._keys_pressed[K_UP]) * dt
+
+        self.player.move(x=x, y=y)
+
+        player_rect = self.player.rect
+        if player_rect.left < 0:
+            player_rect.left = 0
+        elif player_rect.right > SCREEN_RES.width:
+            player_rect.right = SCREEN_RES.width
+
+        for ent in (self.player, self.snail):
+            ent.apply_gravity(dt)
+
     def _check_collisions(self) -> None:
         """
         Checks if objects are colliding.
         """
         if self.player.rect.colliderect(self.snail.rect):
             self.score += 5
+
+        top_ground = self.ground.rect.top
+        for ent in (self.player, self.snail):
+            if top_ground < ent.rect.bottom:
+                ent.rect.bottom = top_ground
+                ent.reset_gravity()
 
     def _handle_key_down(self, key: int) -> None:
         """
