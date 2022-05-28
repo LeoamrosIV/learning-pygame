@@ -5,6 +5,8 @@ Contains base entity classes.
 """
 import pygame as pg
 
+from data import GRAVITY
+
 
 class Entity:
     """
@@ -18,6 +20,7 @@ class Entity:
         assert len(pos) == 1
         self.__surf = surface                      # type: pg.Surface
         self.__rect = self.__surf.get_rect(**pos)  # type: pg.Rect
+        self.__gravity = 0.                        # type: float
 
     @property
     def surf(self) -> pg.Surface:
@@ -41,3 +44,20 @@ class Entity:
         :param surface: A surface to draw `Entity` onto.
         """
         surface.blit(self.surf, self.rect)
+
+    def move(self, x: float = 0., y: float = 0.) -> None:
+        """
+        Updates entity position.
+
+        :param x: x movement.
+        :param y: y movement.
+        """
+        self.rect.x += x
+        self.rect.y += y
+
+    def apply_gravity(self, dt: int):
+        self.__gravity += GRAVITY * dt
+        self.move(y=self.__gravity)
+
+    def reset_gravity(self):
+        self.__gravity = 0
