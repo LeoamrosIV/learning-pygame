@@ -21,4 +21,4 @@ AUDIO_DIR = os.path.join(ASSETS_DIR, "audio")
 FONT_DIR = os.path.join(ASSETS_DIR, "font")
 
 # Gameplay
-GRAVITY = 0.04
+GRAVITY = 0.11

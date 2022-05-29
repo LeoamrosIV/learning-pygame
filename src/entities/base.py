@@ -21,6 +21,9 @@ class Entity:
         self.__surf = surface                      # type: pg.Surface
         self.__rect = self.__surf.get_rect(**pos)  # type: pg.Rect
         self.__gravity = 0.                        # type: float
+        self.__jumping = 0                         # type: int
+        self.__max_jumps = 2                       # type: int
+        self.__jump_height = 20                    # type: int
 
     @property
     def surf(self) -> pg.Surface:
@@ -55,9 +58,17 @@ class Entity:
         self.rect.x += x
         self.rect.y += y
 
-    def apply_gravity(self, dt: int):
+    def jump(self) -> None:
+        if self._can_jump():
+            self.__gravity = - self.__jump_height
+            self.__jumping += 1
+
+    def _can_jump(self) -> bool:
+        return self.__jumping < self.__max_jumps and self.__gravity >= 0
+
+    def apply_gravity(self, dt: int) -> None:
         self.__gravity += GRAVITY * dt
         self.move(y=self.__gravity)
 
-    def reset_gravity(self):
-        self.__gravity = 0
+    def reset_gravity(self) -> None:
+        self.__gravity = self.__jumping = 0

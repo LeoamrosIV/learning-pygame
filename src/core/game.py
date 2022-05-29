@@ -128,16 +128,17 @@ class Game:
 
         :param dt: delta time.
         """
-        x = y = 0
+        x = 0
 
         # ----- Movement using pygame.key.get_pressed() ----- #
         # keys = pg.key.get_pressed()
         # x += int(keys[K_RIGHT]) - int(keys[K_LEFT])
 
         x += (int(self._keys_pressed[K_RIGHT]) - int(self._keys_pressed[K_LEFT])) * dt * 0.5
-        y -= int(self._keys_pressed[K_UP]) * dt
+        if self._keys_pressed[K_UP]:
+            self.player.jump()
 
-        self.player.move(x=x, y=y)
+        self.player.move(x=x)
 
         player_rect = self.player.rect
         if player_rect.left < 0:
