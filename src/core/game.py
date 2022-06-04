@@ -12,7 +12,7 @@ from data import (SCREEN_RES, GAME_TITLE, MAX_FPS,
                   get_sprite, get_font)
 
 from entities import StaticEntity, Actor
-from entities.components import BaseJump, DoubleJump, JetpackJump
+from entities.components import BaseJump, DoubleJump, JetpackJump, RocketJump
 
 
 class Game:
@@ -51,7 +51,7 @@ class Game:
         self.ground.rect.topleft = (0, self.sky.rect.height)
 
         self.player = Actor(get_sprite("player", "player_stand.png"),
-                            (BaseJump, DoubleJump, JetpackJump))
+                            (BaseJump, DoubleJump, JetpackJump, RocketJump))
         self.player.rect.midbottom = (50, self.ground.rect.y)
 
         self.snail = Actor(get_sprite("snail", "snail1.png"))

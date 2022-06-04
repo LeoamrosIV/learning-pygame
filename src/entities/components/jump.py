@@ -49,3 +49,14 @@ class JetpackJump(_JumpComponent):
     max_jumps = 25
     jump_height = 10.
     multi_jump_tempo = -8.
+
+
+@dataclass
+class RocketJump(_JumpComponent):
+    """
+    A jump with high initial propulsion.
+    """
+    name = "Rocket Jump"
+    max_jumps = 1
+    jump_height = 50.
+    multi_jump_tempo = 0.
