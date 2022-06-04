@@ -8,7 +8,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class JumpComponent(ABC):
+class _JumpComponent(ABC):
     """
     Generic jump component.
     """
@@ -19,7 +19,7 @@ class JumpComponent(ABC):
 
 
 @dataclass
-class BaseJump(JumpComponent):
+class BaseJump(_JumpComponent):
     """
     The most basic type of jump.
     """
@@ -30,7 +30,7 @@ class BaseJump(JumpComponent):
 
 
 @dataclass
-class DoubleJump(JumpComponent):
+class DoubleJump(_JumpComponent):
     """
     A jump where you can jump a second time in midair.
     """
@@ -41,7 +41,7 @@ class DoubleJump(JumpComponent):
 
 
 @dataclass
-class JetpackJump(JumpComponent):
+class JetpackJump(_JumpComponent):
     """
     A jump that simulates a jetpack.
     """
