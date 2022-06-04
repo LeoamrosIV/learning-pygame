@@ -11,7 +11,8 @@ from pygame.locals import *
 from data import (SCREEN_RES, GAME_TITLE, MAX_FPS,
                   get_sprite, get_font)
 
-from entities import Entity
+from entities import StaticEntity, Actor
+from entities.components import BaseJump, DoubleJump, JetpackJump
 
 
 class Game:
@@ -29,6 +30,7 @@ class Game:
         }
         self._init_window()
         self._init_entities()
+        self._init_hud_elements()
         self._run_game_loop()
 
     def _init_window(self) -> None:
@@ -42,18 +44,31 @@ class Game:
         """
         Initializes persistent entities.
         """
+        self.sky = StaticEntity(get_sprite("background", "sky.png"))
+        self.sky.rect.topleft = (0, 0)
+
+        self.ground = StaticEntity(get_sprite("background", "ground.png"))
+        self.ground.rect.topleft = (0, self.sky.rect.height)
+
+        self.player = Actor(get_sprite("player", "player_stand.png"),
+                            (BaseJump, DoubleJump, JetpackJump))
+        self.player.rect.midbottom = (50, self.ground.rect.y)
+
+        self.snail = Actor(get_sprite("snail", "snail1.png"))
+        self.snail.rect.midbottom = (SCREEN_RES.width, self.ground.rect.y)
+
+    def _init_hud_elements(self) -> None:
+        """
+        Initializes texts to draw on screen.
+        """
         self.font = get_font(50)
         self.score = 0
+
         self.score_pos = (20, SCREEN_RES.height - 28)
+        self.jump_info_pos = (SCREEN_RES.width // 2, 30)
 
-        self.sky = Entity(get_sprite("background", "sky.png"))
-        self.ground = Entity(get_sprite("background", "ground.png"), topleft=(0, self.sky.rect.height))
-
-        self.player = Entity(get_sprite("player", "player_stand.png"),
-                             midbottom=(50, self.ground.rect.y))
-
-        self.snail = Entity(get_sprite("snail", "snail1.png"),
-                            midbottom=(SCREEN_RES.width, self.ground.rect.y))
+        self.score_text = "Score: {}"
+        self.jump_info_text = "Press 'Z' to change jump type. Using: {}"
 
     def _run_game_loop(self) -> None:
         """
@@ -93,6 +108,21 @@ class Game:
                 # Exit the game
                 sys.exit()
 
+    def _update_hud(self) -> None:
+        score_surf = self.font.render(self.score_text.format(self.score), False, "black")
+        score_rect = score_surf.get_rect(midleft=self.score_pos)
+        score_bg_rect = score_rect.inflate(10, 10)
+        score_bg_rect.y -= 4
+        pg.draw.rect(self.screen, "bisque2", score_bg_rect, border_radius=3)
+        self.screen.blit(score_surf, score_rect)
+
+        jump_info_surf = self.font.render(self.jump_info_text.format(self.player.get_jump_type()), False, "black")
+        jump_info_rect = jump_info_surf.get_rect(midtop=self.jump_info_pos)
+        jump_info_bg_rect = jump_info_rect.inflate(10, 10)
+        jump_info_bg_rect.y -= 4
+        pg.draw.rect(self.screen, "azure", jump_info_bg_rect, border_radius=3)
+        self.screen.blit(jump_info_surf, jump_info_rect)
+
     def _update_screen(self) -> None:
         """
         Draws elements on screen.
@@ -100,12 +130,7 @@ class Game:
         self.sky.blit(self.screen)
         self.ground.blit(self.screen)
 
-        score_surf = self.font.render(f"Score: {self.score}", False, "black")
-        score_rect = score_surf.get_rect(midleft=self.score_pos)
-        score_bg_rect = score_rect.inflate(10, 10)
-        score_bg_rect.y -= 4
-        pg.draw.rect(self.screen, "bisque2", score_bg_rect, border_radius=3)
-        self.screen.blit(score_surf, score_rect)
+        self._update_hud()
 
         self.player.blit(self.screen)
         self.snail.blit(self.screen)
@@ -160,7 +185,7 @@ class Game:
         for ent in (self.player, self.snail):
             if top_ground < ent.rect.bottom:
                 ent.rect.bottom = top_ground
-                ent.reset_gravity()
+                ent.landed()
 
     def _handle_key_down(self, key: int) -> None:
         """
@@ -168,7 +193,9 @@ class Game:
 
         :param key: Pressed key.
         """
-        self._keys_pressed[key] = True
+        if key in self._keys_pressed:
+            self._keys_pressed[key] = True
+            return
 
     def _handle_key_up(self, key: int) -> None:
         """
@@ -176,4 +203,9 @@ class Game:
 
         :param key: Released key.
         """
-        self._keys_pressed[key] = False
+        if key in self._keys_pressed:
+            self._keys_pressed[key] = False
+            return
+
+        if key == K_z:
+            self.player.change_jump_type()

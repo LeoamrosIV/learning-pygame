@@ -3,27 +3,31 @@
 """
 Contains base entity classes.
 """
+from typing import Protocol, Iterable, Optional
+from abc import ABC
+
 import pygame as pg
 
 from data import GRAVITY
+from .processors import JumpProcessor
 
 
-class Entity:
+class _JumpComponent(Protocol):
+    """Represents the jump component interface"""
+    name: str
+    max_jumps: int
+    jump_height: float
+    multi_jump_tempo: float
+
+
+class Entity(ABC):
     """
     Base class for every game entity.
     """
 
-    def __init__(self, surface: pg.Surface, **pos: tuple[int, int]):
-        if not pos:
-            pos = {"topleft": (0, 0)}
-
-        assert len(pos) == 1
-        self.__surf = surface                      # type: pg.Surface
-        self.__rect = self.__surf.get_rect(**pos)  # type: pg.Rect
-        self.__gravity = 0.                        # type: float
-        self.__jumping = 0                         # type: int
-        self.__max_jumps = 2                       # type: int
-        self.__jump_height = 20                    # type: int
+    def __init__(self, surface: pg.Surface):
+        self.__surf = surface                 # type: pg.Surface
+        self.__rect = self.__surf.get_rect()  # type: pg.Rect
 
     @property
     def surf(self) -> pg.Surface:
@@ -48,6 +52,23 @@ class Entity:
         """
         surface.blit(self.surf, self.rect)
 
+
+class StaticEntity(Entity):
+    """A static entity that doesn't move."""
+
+
+class Actor(Entity):
+    """An animate entity."""
+
+    def __init__(self, surface: pg.Surface, jump_components: Optional[Iterable[_JumpComponent]] = None) -> None:
+        super().__init__(surface)
+        self.gravity = 0.                                              # type: float
+
+        if jump_components is None:
+            jump_components = ()
+
+        self.__jump_processor = JumpProcessor(self, *jump_components)  # type: JumpProcessor
+
     def move(self, x: float = 0., y: float = 0.) -> None:
         """
         Updates entity position.
@@ -55,20 +76,26 @@ class Entity:
         :param x: x movement.
         :param y: y movement.
         """
-        self.rect.x += x
-        self.rect.y += y
+        self.rect.move_ip(x, y)
 
     def jump(self) -> None:
-        if self._can_jump():
-            self.__gravity = - self.__jump_height
-            self.__jumping += 1
+        self.__jump_processor.jump()
 
-    def _can_jump(self) -> bool:
-        return self.__jumping < self.__max_jumps and self.__gravity >= 0
+    def landed(self) -> None:
+        self.__jump_processor.landed()
 
     def apply_gravity(self, dt: int) -> None:
-        self.__gravity += GRAVITY * dt
-        self.move(y=self.__gravity)
+        self.gravity += GRAVITY * dt
+        self.move(y=self.gravity)
 
-    def reset_gravity(self) -> None:
-        self.__gravity = self.__jumping = 0
+    def change_jump_type(self) -> None:
+        """
+        Changes active jump type for this entity.
+        """
+        self.__jump_processor.change_jump_type()
+
+    def get_jump_type(self) -> str:
+        """
+        Returns active jump name.
+        """
+        return self.__jump_processor.active()
