@@ -22,7 +22,12 @@ class WrongState(Exception):
 class GameProtocol(Protocol):
     keys_pressed: dict[int, bool]
     screen: pg.Surface
-    def set_state(self, state: State) -> None: ...
+    score: int
+    def new_game(self) -> None: ...
+    def resume_game(self) -> None: ...
+    def main_menu(self) -> None: ...
+    def pause_game(self) -> None: ...
+    def game_over(self) -> None: ...
 
 
 class GameState(ABC):
@@ -41,6 +46,14 @@ class GameState(ABC):
     @property
     def screen(self) -> pg.Surface:
         return self._game.screen
+
+    @property
+    def score(self) -> int:
+        return self._game.score
+
+    @score.setter
+    def score(self, v: int) -> None:
+        self._game.score = v
 
     @abstractmethod
     def _init(self):

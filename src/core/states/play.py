@@ -7,7 +7,7 @@ in which the player can play the game.
 import pygame as pg
 from pygame.locals import *
 
-from data import State, get_sprite, get_font
+from data import get_sprite, get_font
 from data.const.settings import *
 from data.const.keybindings import *
 
@@ -29,12 +29,15 @@ class PlayState(GameState):
         self._handle_movement(dt)
         self._check_collisions()
 
-    def _process_event(self, event: pg.event.Event, dt: int) -> None:
+    def _process_event(self, event, dt):
         if event.type == KEYDOWN:
             self._handle_key_down(event.key)
 
         elif event.type == KEYUP:
             self._handle_key_up(event.key)
+
+        elif event.type == WINDOWFOCUSLOST:
+            self._game.pause_game()
 
         elif event.type == pg.MOUSEBUTTONDOWN:
             if self.snail.rect.collidepoint(event.pos):
@@ -144,7 +147,7 @@ class PlayState(GameState):
         Checks if objects are colliding.
         """
         if self.player.rect.colliderect(self.snail.rect):
-            self._game.set_state(State.GAME_OVER)
+            self._game.game_over()
 
         top_ground = self.ground.rect.top
         for ent in (self.player, self.snail):
@@ -160,7 +163,12 @@ class PlayState(GameState):
         """
         if key in self.keys_pressed:
             self.keys_pressed[key] = True
-            return
+
+        elif key is PAUSE_KEY:
+            self._game.pause_game()
+
+        elif key is MENU_KEY:
+            self._game.main_menu()
 
     def _handle_key_up(self, key: int) -> None:
         """
@@ -170,7 +178,6 @@ class PlayState(GameState):
         """
         if key in self.keys_pressed:
             self.keys_pressed[key] = False
-            return
 
-        if key == CHANGE_JUMP_KEY:
+        elif key == CHANGE_JUMP_KEY:
             self.player.change_jump_type()

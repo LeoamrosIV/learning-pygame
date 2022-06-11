@@ -41,3 +41,38 @@ class StateManager:
         """
         return self.__states[self.__active]
 
+    def new_game(self) -> None:
+        """
+        Starts a new game.
+        """
+        assert self.__active in (State.MENU, State.GAME_OVER)
+        self.__states[State.PLAYING] = PlayState(self._game)
+        self.set_state(State.PLAYING)
+
+    def resume_game(self) -> None:
+        """
+        Resumes the current game.
+        """
+        assert self.__active in (State.PAUSE, State.MENU)
+        self.set_state(State.PLAYING)
+
+    def main_menu(self) -> None:
+        """
+        Goes to main menu.
+        """
+        assert self.__active is not State.MENU
+        self.set_state(State.MENU)
+
+    def pause_game(self) -> None:
+        """
+        Pauses the game.
+        """
+        assert self.__active is State.PLAYING
+        self.set_state(State.PAUSE)
+
+    def game_over(self) -> None:
+        """
+        Ends the current game.
+        """
+        assert self.__active is State.PLAYING
+        self.set_state(State.GAME_OVER)

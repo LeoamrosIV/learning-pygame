@@ -5,7 +5,6 @@ Contains `Game` class.
 """
 import pygame as pg
 
-from data import State
 from data.const.settings import *
 from data.const.keybindings import *
 
@@ -28,6 +27,7 @@ class Game:
         }                                        # type: dict[int, bool]
 
         self._init_window()
+        self.score = 0                           # type: int
 
         self.state_manager = StateManager(self)  # type: StateManager
         self._run_game_loop()
@@ -50,10 +50,44 @@ class Game:
             dt = clock.tick(MAX_FPS)
             self.state_manager.active_state().loop(dt)
 
-    def set_state(self, state: State) -> None:
+    def _reset_keys_pressed(self):
         """
-        Sets the active state of the game.
+        Sets all pressed keys to `False`.
+        """
+        for key in self.keys_pressed:
+            self.keys_pressed[key] = False
 
-        :param state: the `State` to set as active.
+    def new_game(self) -> None:
         """
-        self.state_manager.set_state(state)
+        Starts a new game.
+        """
+        self._reset_keys_pressed()
+        self.state_manager.new_game()
+
+    def resume_game(self) -> None:
+        """
+        Resumes the current game.
+        """
+        self._reset_keys_pressed()
+        self.state_manager.resume_game()
+
+    def main_menu(self) -> None:
+        """
+        Goes to main menu.
+        """
+        self._reset_keys_pressed()
+        self.state_manager.main_menu()
+
+    def pause_game(self) -> None:
+        """
+        Pauses the game.
+        """
+        self._reset_keys_pressed()
+        self.state_manager.pause_game()
+
+    def game_over(self) -> None:
+        """
+        Ends the current game.
+        """
+        self._reset_keys_pressed()
+        self.state_manager.game_over()

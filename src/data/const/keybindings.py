@@ -10,3 +10,7 @@ MOVE_RIGHT_KEY = _locals.K_d
 MOVE_LEFT_KEY = _locals.K_a
 JUMP_KEY = _locals.K_w
 CHANGE_JUMP_KEY = _locals.K_q
+
+RESTART_KEY = _locals.K_SPACE
+PAUSE_KEY = _locals.K_SPACE
+MENU_KEY = _locals.K_ESCAPE

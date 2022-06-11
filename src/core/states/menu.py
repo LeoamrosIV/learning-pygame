@@ -19,10 +19,10 @@ class MenuState(GameState):
     def _loop(self, dt):
         pass
 
-    def _process_event(self, event: pg.event.Event, dt: int) -> None:
+    def _process_event(self, event, dt):
         pass
 
-    def _update_screen(self) -> None:
+    def _update_screen(self):
         pass
 
     # Own methods
