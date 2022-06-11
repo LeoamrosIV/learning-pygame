@@ -8,8 +8,10 @@ import sys
 import pygame as pg
 from pygame.locals import *
 
-from data import (SCREEN_RES, GAME_TITLE, MAX_FPS,
-                  get_sprite, get_font)
+from data import (get_sprite, get_font)
+
+from data.const.settings import *
+from data.const.keybindings import *
 
 from entities import StaticEntity, Actor
 from entities.components import BaseJump, DoubleJump, JetpackJump, RocketJump
@@ -24,9 +26,9 @@ class Game:
         # Initialize all imported pygame modules.
         pg.init()
         self._keys_pressed = {
-            K_UP: False,
-            K_RIGHT: False,
-            K_LEFT: False,
+            JUMP_KEY: False,
+            MOVE_RIGHT_KEY: False,
+            MOVE_LEFT_KEY: False,
         }
         self._init_window()
         self._init_entities()
@@ -68,7 +70,7 @@ class Game:
         self.jump_info_pos = (SCREEN_RES.width // 2, 30)
 
         self.score_text = "Score: {}"
-        self.jump_info_text = "Press 'Z' to change jump type. Using: {}"
+        self.jump_info_text = "Press [{}] to change jump type. Using: {}"
 
     def _run_game_loop(self) -> None:
         """
@@ -116,7 +118,10 @@ class Game:
         pg.draw.rect(self.screen, "bisque2", score_bg_rect, border_radius=3)
         self.screen.blit(score_surf, score_rect)
 
-        jump_info_surf = self.font.render(self.jump_info_text.format(self.player.get_jump_type()), False, "black")
+        jump_info_surf = self.font.render(self.jump_info_text.format(pg.key.name(CHANGE_JUMP_KEY).upper(),
+                                                                     self.player.get_jump_type()),
+                                          False, "black")
+
         jump_info_rect = jump_info_surf.get_rect(midtop=self.jump_info_pos)
         jump_info_bg_rect = jump_info_rect.inflate(10, 10)
         jump_info_bg_rect.y -= 4
@@ -140,6 +145,7 @@ class Game:
             pg.draw.circle(self.screen, "gold", mouse_pos, 30, 5)
 
         if self.snail.rect.right <= 0:
+            self.score += 100
             self.snail.rect.left = SCREEN_RES.width
         else:
             self.snail.rect.x -= 1
@@ -157,10 +163,10 @@ class Game:
 
         # ----- Movement using pygame.key.get_pressed() ----- #
         # keys = pg.key.get_pressed()
-        # x += int(keys[K_RIGHT]) - int(keys[K_LEFT])
+        # x += int(keys[MOVE_RIGHT_KEY]) - int(keys[MOVE_LEFT_KEY])
 
-        x += (int(self._keys_pressed[K_RIGHT]) - int(self._keys_pressed[K_LEFT])) * dt * 0.5
-        if self._keys_pressed[K_UP]:
+        x += (int(self._keys_pressed[MOVE_RIGHT_KEY]) - int(self._keys_pressed[MOVE_LEFT_KEY])) * dt * 0.5
+        if self._keys_pressed[JUMP_KEY]:
             self.player.jump()
 
         self.player.move(x=x)
@@ -207,5 +213,5 @@ class Game:
             self._keys_pressed[key] = False
             return
 
-        if key == K_z:
+        if key == CHANGE_JUMP_KEY:
             self.player.change_jump_type()
