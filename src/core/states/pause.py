@@ -9,6 +9,8 @@ from pygame.locals import *
 
 from data import PAUSE_KEY, SCREEN_RES, SCREEN_CENTER, get_font
 
+from entities import StaticEntity
+
 from .state import GameState
 
 
@@ -29,13 +31,15 @@ class PauseState(GameState):
                 self._game.resume_game()
 
     def _update_screen(self):
-        self.screen.blit(*self._get_background_surf())
-        self.screen.blit(*self._get_pause_surf())
-        self.screen.blit(*self._get_hint_surf())
+        for ent in (self._get_background_surf(),
+                    self._get_pause_surf(),
+                    self._get_hint_surf(),
+                    ):
+            ent.blit(self.screen)
 
     # Own methods
 
-    def _get_background_surf(self) -> tuple[pg.Surface, pg.Rect]:
+    def _get_background_surf(self) -> StaticEntity:
         """
         Returns a surface and a rect that represents pause screen background.
 
@@ -44,9 +48,9 @@ class PauseState(GameState):
         background = pg.Surface(SCREEN_RES)
         background.set_alpha(self._background_alpha)
         background.fill("white")
-        return background, background.get_rect(topleft=(0, 0))
+        return StaticEntity(background)
 
-    def _get_pause_surf(self) -> tuple[pg.Surface, pg.Rect]:
+    def _get_pause_surf(self) -> StaticEntity:
         """
         Returns a surface and a rect that represent a "PAUSE" text.
 
@@ -55,9 +59,12 @@ class PauseState(GameState):
         font = get_font(120)
         surf = font.render("PAUSE", False, "black")
         surf.set_alpha(self._text_alpha)
-        return surf, surf.get_rect(center=SCREEN_CENTER)
 
-    def _get_hint_surf(self) -> tuple[pg.Surface, pg.Rect]:
+        pause = StaticEntity(surf)
+        pause.rect.center = SCREEN_CENTER
+        return pause
+
+    def _get_hint_surf(self) -> StaticEntity:
         """
         Returns a surface and a rect that represent a hint for
         the user that explains how to resume game.
@@ -74,4 +81,6 @@ class PauseState(GameState):
         surf.set_alpha(self._text_alpha)
         x, y = SCREEN_CENTER
 
-        return surf, surf.get_rect(center=(x, y + 50))
+        hint = StaticEntity(surf)
+        hint.rect.center = (x, y + 50)
+        return hint

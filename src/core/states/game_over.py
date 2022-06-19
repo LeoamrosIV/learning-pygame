@@ -10,6 +10,8 @@ from pygame.locals import *
 from data import SCREEN_RES, SCREEN_CENTER, get_font
 from data.const.keybindings import RESTART_KEY, MENU_KEY
 
+from entities import StaticEntity
+
 from .state import GameState
 
 
@@ -33,14 +35,16 @@ class GameOverState(GameState):
                 self._game.main_menu()
 
     def _update_screen(self):
-        self.screen.blit(*self._get_background_surf())
-        self.screen.blit(*self._get_game_over_surf())
-        self.screen.blit(*self._get_score_surf())
-        self.screen.blit(*self._get_hint_surf())
+        for ent in (self._get_background_surf(),
+                    self._get_game_over_surf(),
+                    self._get_score_surf(),
+                    self._get_hint_surf(),
+                    ):
+            ent.blit(self.screen)
 
     # Own methods
 
-    def _get_background_surf(self) -> tuple[pg.Surface, pg.Rect]:
+    def _get_background_surf(self) -> StaticEntity:
         """
         Returns a surface and a rect that represents game over screen background.
 
@@ -49,9 +53,9 @@ class GameOverState(GameState):
         background = pg.Surface(SCREEN_RES)
         background.set_alpha(self._background_alpha)
         background.fill("black")
-        return background, background.get_rect(topleft=(0, 0))
+        return StaticEntity(background)
 
-    def _get_game_over_surf(self) -> tuple[pg.Surface, pg.Rect]:
+    def _get_game_over_surf(self) -> StaticEntity:
         """
         Returns a surface and a rect that represent a "GAME OVER" text.
 
@@ -61,9 +65,12 @@ class GameOverState(GameState):
         surf = font.render("GAME OVER", False, "white")
         surf.set_alpha(self._text_alpha)
         x, y = SCREEN_CENTER
-        return surf, surf.get_rect(center=(x, y - 60))
 
-    def _get_score_surf(self) -> tuple[pg.Surface, pg.Rect]:
+        game_over = StaticEntity(surf)
+        game_over.rect.center = (x, y - 60)
+        return game_over
+
+    def _get_score_surf(self) -> StaticEntity:
         """
         Returns a surface and a rect that show the final score to the user.
 
@@ -73,9 +80,12 @@ class GameOverState(GameState):
         font = get_font(60)
         surf = font.render(text, False, "white")
         surf.set_alpha(self._text_alpha)
-        return surf, surf.get_rect(center=SCREEN_CENTER)
 
-    def _get_hint_surf(self) -> tuple[pg.Surface, pg.Rect]:
+        score = StaticEntity(surf)
+        score.rect.center = SCREEN_CENTER
+        return score
+
+    def _get_hint_surf(self) -> StaticEntity:
         """
         Returns a surface and a rect that represent a hint for
         the user that explains how to start a new game.
@@ -93,4 +103,6 @@ class GameOverState(GameState):
         surf.set_alpha(self._text_alpha)
         x, y = SCREEN_CENTER
 
-        return surf, surf.get_rect(center=(x, y + 50))
+        hint = StaticEntity(surf)
+        hint.rect.center = (x, y + 50)
+        return hint
