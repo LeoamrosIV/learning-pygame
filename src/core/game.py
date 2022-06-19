@@ -28,6 +28,7 @@ class Game:
 
         self._init_window()
         self.score = 0                           # type: int
+        self._playing = False                    # type: bool
 
         self.state_manager = StateManager(self)  # type: StateManager
         self._run_game_loop()
@@ -61,6 +62,7 @@ class Game:
         """
         Starts a new game.
         """
+        self._playing = True
         self._reset_keys_pressed()
         self.state_manager.new_game()
 
@@ -89,5 +91,12 @@ class Game:
         """
         Ends the current game.
         """
+        self._playing = False
         self._reset_keys_pressed()
         self.state_manager.game_over()
+
+    def has_active_game(self):
+        """
+        True if there is an active game (a paused game is also active).
+        """
+        return self._playing

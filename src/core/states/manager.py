@@ -20,7 +20,7 @@ class StateManager:
             State.PAUSE: PauseState(self._game),
             State.GAME_OVER: GameOverState(self._game),
         }                                                # type: dict[State: GameState]
-        self.__active = State.PLAYING                    # type: State
+        self.__active = State.MENU                       # type: State
 
     def set_state(self, state: State) -> None:
         """
