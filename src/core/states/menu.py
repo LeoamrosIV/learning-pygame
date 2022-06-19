@@ -8,8 +8,8 @@ import sys
 
 import pygame as pg
 
-from data import get_font, SCREEN_CENTER
-from entities import Button
+from data import get_font, get_sprite, SCREEN_RES, SCREEN_CENTER
+from entities import StaticEntity, Button
 
 from .state import GameState
 
@@ -27,12 +27,19 @@ class MenuState(GameState):
             Button(font.render("Exit game", False, "white"), btn_color, sys.exit, active=True),
         ]
 
-        x, y = SCREEN_CENTER
-        y = increment = y // 2
+        x_segment, y_segment = SCREEN_RES.width // 3, SCREEN_RES.height // 4
 
+        x_btn, y_btn = x_segment * 2, y_segment
         for btn in self.buttons:
-            btn.rect.center = (x, y)
-            y += increment
+            btn.rect.center = (x_btn, y_btn)
+            y_btn += y_segment
+
+        logo = get_sprite("player", "player_stand.png")
+        logo_res = tuple(n * 3 for n in logo.get_rect().size)
+        logo = pg.transform.scale(logo, logo_res)
+
+        self.logo = StaticEntity(logo)
+        self.logo.rect.center = x_segment, SCREEN_CENTER[1]
 
     def _loop(self, dt):
         continue_btn = self.buttons[0]
@@ -55,6 +62,8 @@ class MenuState(GameState):
 
     def _update_screen(self):
         self.screen.fill((94, 129, 162))
+        self.logo.blit(self.screen)
+
         for btn in self.buttons:
             btn.blit(self.screen)
 
